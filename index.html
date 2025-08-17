@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <title>Martingale Calculator</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <style>
+        body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; padding: 16px; }
+        table { border-collapse: collapse; margin-top: 12px; width: 100%; max-width: 520px; }
+        td, th { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background: #f5f5f5; }
+    </style>
+</head>
+<body>
+    <h1>Martingale Calculator</h1>
+
+    <table>
+        <tr>
+            <td>Başlangıç Bahsi:</td>
+            <td><input type="number" id="startBalance" min="1" step="1" /></td>
+        </tr>
+        <tr>
+            <td>Toplam Bakiye:</td>
+            <td><input type="number" id="totalBalance" min="1" step="1" /></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><input type="button" id="calculate" value="Hesapla" /></td>
+        </tr>
+    </table>
+
+    <table id="result">
+    <thead>
+        <tr>
+        <th>#</th>
+        <th>Tutar</th>
+        <th>Renk</th>
+        <th>Kümülatif</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+    <tfoot>
+        <tr>
+        <th colspan="3">Toplam</th>
+        <th id="sumCell">0</th>
+        </tr>
+    </tfoot>
+    </table>
+
+    <script>
+        $(document).ready(function() {
+            $('#calculate').on('click', function() {
+                var startBalance = $("#startBalance").val();
+                var totalBalance = $("#totalBalance").val();
+                var start = parseInt(startBalance);
+                var total = parseInt(totalBalance);
+
+                if (total < start) {
+                    alert("Hata!");
+                    return;
+                }
+
+                $("#result tbody").html('');
+
+                var subTotal = 0;
+                var betAmount = start;
+                var bets = [];
+                while (betAmount + subTotal <= total) {
+                    var random = Math.floor(Math.random() * 100);
+                    bets.push({
+                        value: betAmount,
+                        color: random % 2 == 0 ? 'Kırmızı' : 'Siyah'
+                    });
+                    subTotal += betAmount;
+                    betAmount *= 2;
+                }
+                var difference = total - subTotal;
+                while (difference > 0) {
+                    var tmpBets = [];
+                    subTotal = 0;
+                    betAmount = start;
+                    while (betAmount + subTotal <= difference) {
+                        tmpBets.push(betAmount);
+                        subTotal += betAmount;
+                        betAmount *= 2;
+                    }
+                    difference -= subTotal;
+                    for (var i = 0; i < tmpBets.length; i++) {
+                        bets[bets.length - tmpBets.length + i].value += tmpBets[i]; 
+                    }
+                }
+                let generalTotal = 0;
+                bets.forEach((bet, i) => {
+                    generalTotal += bet.value;
+                    $("#result tbody").append(
+                        `<tr>
+                        <td>${i + 1}</td>
+                        <td>${bet.value}</td>
+                        <td>${bet.color}</td>
+                        <td>${generalTotal}</td>
+                        </tr>`
+                    );
+                });
+                $("#sumCell").text(generalTotal);
+            });
+        });
+    </script>
+</body>
+</html>
